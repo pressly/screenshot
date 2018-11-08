@@ -66,8 +66,11 @@ type TargetHandler struct {
 func NewTargetHandler(t client.Target, logf, debugf, errf func(string, ...interface{})) (*TargetHandler, error) {
 	conn, err := client.Dial(t.GetWebsocketURL())
 	if err != nil {
+		fmt.Println("failed to connect to", t.GetWebsocketURL())
 		return nil, err
 	}
+
+	fmt.Println("connected to", t.GetWebsocketURL())
 
 	return &TargetHandler{
 		conn:   conn,
