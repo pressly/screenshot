@@ -37,9 +37,6 @@ import url "net/url"
 type Screenshot interface {
 	// Image takes a URL and produces a screenshot of that page.
 	Image(context.Context, *RequestImage) (*Resp, error)
-
-	// Image takes a URL and produces a screenshot of that page.
-	PDF(context.Context, *RequestPDF) (*Resp, error)
 }
 
 // ==========================
@@ -48,16 +45,15 @@ type Screenshot interface {
 
 type screenshotProtobufClient struct {
 	client HTTPClient
-	urls   [2]string
+	urls   [1]string
 }
 
 // NewScreenshotProtobufClient creates a Protobuf client that implements the Screenshot interface.
 // It communicates using Protobuf and can be configured with a custom HTTPClient.
 func NewScreenshotProtobufClient(addr string, client HTTPClient) Screenshot {
 	prefix := urlBase(addr) + ScreenshotPathPrefix
-	urls := [2]string{
+	urls := [1]string{
 		prefix + "Image",
-		prefix + "PDF",
 	}
 	if httpClient, ok := client.(*http.Client); ok {
 		return &screenshotProtobufClient{
@@ -80,31 +76,21 @@ func (c *screenshotProtobufClient) Image(ctx context.Context, in *RequestImage) 
 	return out, err
 }
 
-func (c *screenshotProtobufClient) PDF(ctx context.Context, in *RequestPDF) (*Resp, error) {
-	ctx = ctxsetters.WithPackageName(ctx, "pressly")
-	ctx = ctxsetters.WithServiceName(ctx, "Screenshot")
-	ctx = ctxsetters.WithMethodName(ctx, "PDF")
-	out := new(Resp)
-	err := doProtobufRequest(ctx, c.client, c.urls[1], in, out)
-	return out, err
-}
-
 // ======================
 // Screenshot JSON Client
 // ======================
 
 type screenshotJSONClient struct {
 	client HTTPClient
-	urls   [2]string
+	urls   [1]string
 }
 
 // NewScreenshotJSONClient creates a JSON client that implements the Screenshot interface.
 // It communicates using JSON and can be configured with a custom HTTPClient.
 func NewScreenshotJSONClient(addr string, client HTTPClient) Screenshot {
 	prefix := urlBase(addr) + ScreenshotPathPrefix
-	urls := [2]string{
+	urls := [1]string{
 		prefix + "Image",
-		prefix + "PDF",
 	}
 	if httpClient, ok := client.(*http.Client); ok {
 		return &screenshotJSONClient{
@@ -124,15 +110,6 @@ func (c *screenshotJSONClient) Image(ctx context.Context, in *RequestImage) (*Re
 	ctx = ctxsetters.WithMethodName(ctx, "Image")
 	out := new(Resp)
 	err := doJSONRequest(ctx, c.client, c.urls[0], in, out)
-	return out, err
-}
-
-func (c *screenshotJSONClient) PDF(ctx context.Context, in *RequestPDF) (*Resp, error) {
-	ctx = ctxsetters.WithPackageName(ctx, "pressly")
-	ctx = ctxsetters.WithServiceName(ctx, "Screenshot")
-	ctx = ctxsetters.WithMethodName(ctx, "PDF")
-	out := new(Resp)
-	err := doJSONRequest(ctx, c.client, c.urls[1], in, out)
 	return out, err
 }
 
@@ -186,9 +163,6 @@ func (s *screenshotServer) ServeHTTP(resp http.ResponseWriter, req *http.Request
 	switch req.URL.Path {
 	case "/twirp/pressly.Screenshot/Image":
 		s.serveImage(ctx, resp, req)
-		return
-	case "/twirp/pressly.Screenshot/PDF":
-		s.servePDF(ctx, resp, req)
 		return
 	default:
 		msg := fmt.Sprintf("no handler for path %q", req.URL.Path)
@@ -317,146 +291,6 @@ func (s *screenshotServer) serveImageProtobuf(ctx context.Context, resp http.Res
 	}
 	if respContent == nil {
 		s.writeError(ctx, resp, twirp.InternalError("received a nil *Resp and nil error while calling Image. nil responses are not supported"))
-		return
-	}
-
-	ctx = callResponsePrepared(ctx, s.hooks)
-
-	respBytes, err := proto.Marshal(respContent)
-	if err != nil {
-		err = wrapErr(err, "failed to marshal proto response")
-		s.writeError(ctx, resp, twirp.InternalErrorWith(err))
-		return
-	}
-
-	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
-	resp.Header().Set("Content-Type", "application/protobuf")
-	resp.WriteHeader(http.StatusOK)
-	if _, err = resp.Write(respBytes); err != nil {
-		log.Printf("errored while writing response to client, but already sent response status code to 200: %s", err)
-	}
-	callResponseSent(ctx, s.hooks)
-}
-
-func (s *screenshotServer) servePDF(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
-	header := req.Header.Get("Content-Type")
-	i := strings.Index(header, ";")
-	if i == -1 {
-		i = len(header)
-	}
-	switch strings.TrimSpace(strings.ToLower(header[:i])) {
-	case "application/json":
-		s.servePDFJSON(ctx, resp, req)
-	case "application/protobuf":
-		s.servePDFProtobuf(ctx, resp, req)
-	default:
-		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
-		twerr := badRouteError(msg, req.Method, req.URL.Path)
-		s.writeError(ctx, resp, twerr)
-	}
-}
-
-func (s *screenshotServer) servePDFJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
-	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "PDF")
-	ctx, err = callRequestRouted(ctx, s.hooks)
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-
-	defer closebody(req.Body)
-	reqContent := new(RequestPDF)
-	unmarshaler := jsonpb.Unmarshaler{AllowUnknownFields: true}
-	if err = unmarshaler.Unmarshal(req.Body, reqContent); err != nil {
-		err = wrapErr(err, "failed to parse request json")
-		s.writeError(ctx, resp, twirp.InternalErrorWith(err))
-		return
-	}
-
-	// Call service method
-	var respContent *Resp
-	func() {
-		defer func() {
-			// In case of a panic, serve a 500 error and then panic.
-			if r := recover(); r != nil {
-				s.writeError(ctx, resp, twirp.InternalError("Internal service panic"))
-				panic(r)
-			}
-		}()
-		respContent, err = s.PDF(ctx, reqContent)
-	}()
-
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *Resp and nil error while calling PDF. nil responses are not supported"))
-		return
-	}
-
-	ctx = callResponsePrepared(ctx, s.hooks)
-
-	var buf bytes.Buffer
-	marshaler := &jsonpb.Marshaler{OrigName: true}
-	if err = marshaler.Marshal(&buf, respContent); err != nil {
-		err = wrapErr(err, "failed to marshal json response")
-		s.writeError(ctx, resp, twirp.InternalErrorWith(err))
-		return
-	}
-
-	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
-	resp.Header().Set("Content-Type", "application/json")
-	resp.WriteHeader(http.StatusOK)
-	if _, err = resp.Write(buf.Bytes()); err != nil {
-		log.Printf("errored while writing response to client, but already sent response status code to 200: %s", err)
-	}
-	callResponseSent(ctx, s.hooks)
-}
-
-func (s *screenshotServer) servePDFProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
-	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "PDF")
-	ctx, err = callRequestRouted(ctx, s.hooks)
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-
-	defer closebody(req.Body)
-	buf, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		err = wrapErr(err, "failed to read request body")
-		s.writeError(ctx, resp, twirp.InternalErrorWith(err))
-		return
-	}
-	reqContent := new(RequestPDF)
-	if err = proto.Unmarshal(buf, reqContent); err != nil {
-		err = wrapErr(err, "failed to parse request proto")
-		s.writeError(ctx, resp, twirp.InternalErrorWith(err))
-		return
-	}
-
-	// Call service method
-	var respContent *Resp
-	func() {
-		defer func() {
-			// In case of a panic, serve a 500 error and then panic.
-			if r := recover(); r != nil {
-				s.writeError(ctx, resp, twirp.InternalError("Internal service panic"))
-				panic(r)
-			}
-		}()
-		respContent, err = s.PDF(ctx, reqContent)
-	}()
-
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *Resp and nil error while calling PDF. nil responses are not supported"))
 		return
 	}
 
@@ -901,17 +735,19 @@ func callError(ctx context.Context, h *twirp.ServerHooks, err twirp.Error) conte
 }
 
 var twirpFileDescriptor0 = []byte{
-	// 179 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x29, 0x2a, 0x48, 0xd6,
-	0x2f, 0x4e, 0x2e, 0x4a, 0x4d, 0xcd, 0x2b, 0xce, 0xc8, 0x2f, 0xd1, 0x2f, 0x4e, 0x2d, 0x2a, 0xcb,
-	0x4c, 0x4e, 0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x2f, 0x28, 0x4a, 0x2d, 0x2e, 0xce,
-	0xa9, 0x54, 0x52, 0xe0, 0xe2, 0x09, 0x4a, 0x2d, 0x2c, 0x4d, 0x2d, 0x2e, 0xf1, 0xcc, 0x4d, 0x4c,
-	0x4f, 0x15, 0x12, 0xe0, 0x62, 0x2e, 0x2d, 0xca, 0x91, 0x60, 0x54, 0x60, 0xd4, 0xe0, 0x0c, 0x02,
-	0x31, 0x95, 0xe4, 0xb8, 0xb8, 0xa0, 0x2a, 0x02, 0x5c, 0xdc, 0xb0, 0xc8, 0x4b, 0x71, 0xb1, 0x04,
-	0xa5, 0x16, 0x17, 0x08, 0x09, 0x71, 0xb1, 0x14, 0xa5, 0x16, 0x17, 0x80, 0xa5, 0x78, 0x82, 0xc0,
-	0x6c, 0xa3, 0x34, 0x2e, 0xae, 0x60, 0xb8, 0x13, 0x84, 0x74, 0xb9, 0x58, 0x21, 0x96, 0x88, 0xea,
-	0x41, 0xad, 0xd7, 0x43, 0xb6, 0x5b, 0x8a, 0x17, 0x49, 0xb8, 0xb8, 0x40, 0x48, 0x93, 0x8b, 0x19,
-	0x64, 0xa3, 0x30, 0xba, 0xe2, 0x00, 0x17, 0x37, 0x34, 0xa5, 0x4e, 0x3c, 0x51, 0x5c, 0x08, 0xaf,
-	0x26, 0xb1, 0x81, 0xfd, 0x68, 0x0c, 0x08, 0x00, 0x00, 0xff, 0xff, 0xf5, 0x28, 0xf6, 0x41, 0x03,
-	0x01, 0x00, 0x00,
+	// 212 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x64, 0x50, 0x41, 0x4b, 0x86, 0x40,
+	0x14, 0x64, 0xfb, 0xf4, 0x8b, 0x1e, 0x1b, 0xc4, 0x42, 0xb1, 0x48, 0x84, 0x78, 0xf2, 0x92, 0x42,
+	0x1d, 0xbb, 0x45, 0x04, 0xdd, 0x62, 0xbb, 0x75, 0xab, 0xed, 0x91, 0x82, 0xb9, 0xdb, 0x7b, 0x9a,
+	0xfa, 0xef, 0xc3, 0x55, 0x4a, 0xf8, 0x6e, 0x33, 0xf3, 0x18, 0xe6, 0xcd, 0xc0, 0x25, 0x79, 0x5b,
+	0xb2, 0x25, 0xc4, 0x96, 0x2b, 0xd7, 0x95, 0x8c, 0xf4, 0x53, 0x5b, 0x2c, 0x3c, 0xb9, 0xce, 0xa9,
+	0x63, 0x4f, 0xc8, 0xdc, 0x4c, 0x59, 0x05, 0xd2, 0xe0, 0x77, 0x8f, 0xdc, 0x3d, 0x7d, 0xbd, 0x7d,
+	0xa2, 0x3a, 0x83, 0x5d, 0x4f, 0x8d, 0x16, 0xa9, 0xc8, 0x4f, 0xcc, 0x0c, 0xd5, 0x05, 0xec, 0x87,
+	0xba, 0xfd, 0x70, 0x83, 0x3e, 0x0a, 0xe2, 0xca, 0x94, 0x04, 0x31, 0xea, 0x5d, 0x2a, 0xf2, 0xd8,
+	0x88, 0x71, 0x66, 0x93, 0x8e, 0x16, 0x36, 0x29, 0x05, 0x91, 0x25, 0xe7, 0x75, 0x1c, 0x1c, 0x01,
+	0x67, 0x57, 0x00, 0x6b, 0xd2, 0xf3, 0xc3, 0xe3, 0x61, 0x4e, 0x96, 0x40, 0x64, 0x90, 0xfd, 0xec,
+	0x25, 0x64, 0x1f, 0x4e, 0xd2, 0x04, 0x7c, 0x73, 0x07, 0xf0, 0xf2, 0x57, 0x45, 0x5d, 0x43, 0xbc,
+	0x3c, 0x7b, 0x5e, 0xac, 0x35, 0x8a, 0x6d, 0x87, 0xe4, 0x74, 0x23, 0xb3, 0xbf, 0x97, 0xaf, 0xf0,
+	0xbf, 0xc3, 0xfb, 0x3e, 0x0c, 0x70, 0xfb, 0x1b, 0x00, 0x00, 0xff, 0xff, 0xb3, 0xf4, 0x43, 0x7c,
+	0x20, 0x01, 0x00, 0x00,
 }

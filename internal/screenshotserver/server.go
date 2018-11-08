@@ -36,12 +36,14 @@ func (s *Server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, err
 		log.Fatalln(err)
 	}
 
-	err := twirp.SetHTTPResponseHeader(ctx, "Content-Type", "image/png")
-	if err != nil {
+	if err := twirp.SetHTTPResponseHeader(ctx, "Content-Type", "image/png"); err != nil {
 		return nil, twirp.InternalErrorWith(err)
 	}
 
 	return &pb.Resp{}, nil
+}
+
+func (s *Server) PDF(ctx context.Context, req *pb.RequestPDF) (*pb.Resp, error) {
 }
 
 func newChromeInstance(ctx context.Context) (*chromedp.CDP, func()) {
