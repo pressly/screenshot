@@ -17,11 +17,14 @@ A simple scalable server built on top of Headless Chrome. The API is built with 
 - https://github.com/GoogleChrome/puppeteer/blob/fae441cd42fc410115ce9cec40563e21260db9b6/docs/troubleshooting.md#running-puppeteer-in-docker
 - anything else?
 
-# Installation
+# Usage
 
-twirp setup steps:
+1. So far, this project works with [Chrome Canary](https://www.google.com/chrome/canary/) `/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary --headless --remote-debugging-port=9222 --no-gpu` 
+2. However, it doesn't work with `docker run --name=chrome -p 9222:9222 --cap-add=SYS_ADMIN justinribeiro/chrome-headless --headless --remote-debugging-port=9222 --disable-gpu`, which is strange.. trying to figure that out
 
-https://twitchtv.github.io/twirp/docs/install.html
+# Development
+
+1. Install tools to work with [Protocol Buffers and Twirp](https://twitchtv.github.io/twirp/docs/install.html).
 
 # License
 
