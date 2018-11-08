@@ -6,17 +6,14 @@ option go_package = "screenshot";
 service Screenshot {
     // Image takes a URL and produces a screenshot of that page.
     rpc Image(RequestImage) returns (Resp);
-    
-    // Image takes a URL and produces a screenshot of that page.
-    rpc PDF(RequestImage) returns (Resp);
 }
 
 message RequestImage {
     string url = 1;
-}
-
-message RequestPDF {
-    string url = 1;
+    string window = 2;
+    int32 x = 3;
+    int32 y = 4;
+    string crop = 5;
 }
 
 message Resp {
