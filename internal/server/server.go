@@ -1,4 +1,4 @@
-package screenshotserver
+package server
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 
 	"github.com/chromedp/chromedp"
 	pb "github.com/pressly/screenshot/rpc/screenshot"
-	"github.com/twitchtv/twirp"
 )
 
 type Server struct{}
@@ -34,11 +33,6 @@ func (s *Server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, err
 
 	if err := ioutil.WriteFile("img/sample.png", buf, 0644); err != nil {
 		log.Fatalln(err)
-	}
-
-	err := twirp.SetHTTPResponseHeader(ctx, "Content-Type", "image/png")
-	if err != nil {
-		return nil, twirp.InternalErrorWith(err)
 	}
 
 	return &pb.Resp{}, nil
