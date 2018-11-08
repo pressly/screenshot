@@ -16,7 +16,7 @@ type Chrome struct {
 }
 
 func New(ctx context.Context) (*Chrome, error) {
-	c, err := chromedp.New(ctx)
+	c, err := chromedp.New(ctx, chromedp.WithURL(ctx, "http://localhost:9222"))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init chromedp")
 	}
