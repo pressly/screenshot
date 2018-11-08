@@ -11,7 +11,7 @@ import (
 func main() {
 
 	srv := &screenshotserver.Server{}
-	twirpHandler := screenshot.NewScreenshoterServer(srv, nil)
+	twirpHandler := screenshot.NewScreenshotServer(srv, nil)
 
 	log.Fatal(http.ListenAndServe(":6666", twirpHandler))
 }

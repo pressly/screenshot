@@ -28,49 +28,49 @@ import strconv "strconv"
 import json "encoding/json"
 import url "net/url"
 
-// ======================
-// Screenshoter Interface
-// ======================
+// ====================
+// Screenshot Interface
+// ====================
 
-// Screenshoter service takes a screenshots of web pages.
-type Screenshoter interface {
-	// Screenshot takes a URL and produces a screenshot of that page.
-	Screenshot(context.Context, *URL) (*Empty, error)
+// Screenshot service takes a screenshots of web pages.
+type Screenshot interface {
+	// Image takes a URL and produces a screenshot of that page.
+	Image(context.Context, *RequestImage) (*Resp, error)
 }
 
-// ============================
-// Screenshoter Protobuf Client
-// ============================
+// ==========================
+// Screenshot Protobuf Client
+// ==========================
 
-type screenshoterProtobufClient struct {
+type screenshotProtobufClient struct {
 	client HTTPClient
 	urls   [1]string
 }
 
-// NewScreenshoterProtobufClient creates a Protobuf client that implements the Screenshoter interface.
+// NewScreenshotProtobufClient creates a Protobuf client that implements the Screenshot interface.
 // It communicates using Protobuf and can be configured with a custom HTTPClient.
-func NewScreenshoterProtobufClient(addr string, client HTTPClient) Screenshoter {
-	prefix := urlBase(addr) + ScreenshoterPathPrefix
+func NewScreenshotProtobufClient(addr string, client HTTPClient) Screenshot {
+	prefix := urlBase(addr) + ScreenshotPathPrefix
 	urls := [1]string{
-		prefix + "Screenshot",
+		prefix + "Image",
 	}
 	if httpClient, ok := client.(*http.Client); ok {
-		return &screenshoterProtobufClient{
+		return &screenshotProtobufClient{
 			client: withoutRedirects(httpClient),
 			urls:   urls,
 		}
 	}
-	return &screenshoterProtobufClient{
+	return &screenshotProtobufClient{
 		client: client,
 		urls:   urls,
 	}
 }
 
-func (c *screenshoterProtobufClient) Screenshot(ctx context.Context, in *URL) (*Empty, error) {
-	ctx = ctxsetters.WithPackageName(ctx, "pressly.api")
-	ctx = ctxsetters.WithServiceName(ctx, "Screenshoter")
-	ctx = ctxsetters.WithMethodName(ctx, "Screenshot")
-	out := new(Empty)
+func (c *screenshotProtobufClient) Image(ctx context.Context, in *RequestImage) (*Resp, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "pressly")
+	ctx = ctxsetters.WithServiceName(ctx, "Screenshot")
+	ctx = ctxsetters.WithMethodName(ctx, "Image")
+	out := new(Resp)
 	err := doProtobufRequest(ctx, c.client, c.urls[0], in, out)
 	if err != nil {
 		return nil, err
@@ -78,39 +78,39 @@ func (c *screenshoterProtobufClient) Screenshot(ctx context.Context, in *URL) (*
 	return out, nil
 }
 
-// ========================
-// Screenshoter JSON Client
-// ========================
+// ======================
+// Screenshot JSON Client
+// ======================
 
-type screenshoterJSONClient struct {
+type screenshotJSONClient struct {
 	client HTTPClient
 	urls   [1]string
 }
 
-// NewScreenshoterJSONClient creates a JSON client that implements the Screenshoter interface.
+// NewScreenshotJSONClient creates a JSON client that implements the Screenshot interface.
 // It communicates using JSON and can be configured with a custom HTTPClient.
-func NewScreenshoterJSONClient(addr string, client HTTPClient) Screenshoter {
-	prefix := urlBase(addr) + ScreenshoterPathPrefix
+func NewScreenshotJSONClient(addr string, client HTTPClient) Screenshot {
+	prefix := urlBase(addr) + ScreenshotPathPrefix
 	urls := [1]string{
-		prefix + "Screenshot",
+		prefix + "Image",
 	}
 	if httpClient, ok := client.(*http.Client); ok {
-		return &screenshoterJSONClient{
+		return &screenshotJSONClient{
 			client: withoutRedirects(httpClient),
 			urls:   urls,
 		}
 	}
-	return &screenshoterJSONClient{
+	return &screenshotJSONClient{
 		client: client,
 		urls:   urls,
 	}
 }
 
-func (c *screenshoterJSONClient) Screenshot(ctx context.Context, in *URL) (*Empty, error) {
-	ctx = ctxsetters.WithPackageName(ctx, "pressly.api")
-	ctx = ctxsetters.WithServiceName(ctx, "Screenshoter")
-	ctx = ctxsetters.WithMethodName(ctx, "Screenshot")
-	out := new(Empty)
+func (c *screenshotJSONClient) Image(ctx context.Context, in *RequestImage) (*Resp, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "pressly")
+	ctx = ctxsetters.WithServiceName(ctx, "Screenshot")
+	ctx = ctxsetters.WithMethodName(ctx, "Image")
+	out := new(Resp)
 	err := doJSONRequest(ctx, c.client, c.urls[0], in, out)
 	if err != nil {
 		return nil, err
@@ -118,37 +118,37 @@ func (c *screenshoterJSONClient) Screenshot(ctx context.Context, in *URL) (*Empt
 	return out, nil
 }
 
-// ===========================
-// Screenshoter Server Handler
-// ===========================
+// =========================
+// Screenshot Server Handler
+// =========================
 
-type screenshoterServer struct {
-	Screenshoter
+type screenshotServer struct {
+	Screenshot
 	hooks *twirp.ServerHooks
 }
 
-func NewScreenshoterServer(svc Screenshoter, hooks *twirp.ServerHooks) TwirpServer {
-	return &screenshoterServer{
-		Screenshoter: svc,
-		hooks:        hooks,
+func NewScreenshotServer(svc Screenshot, hooks *twirp.ServerHooks) TwirpServer {
+	return &screenshotServer{
+		Screenshot: svc,
+		hooks:      hooks,
 	}
 }
 
 // writeError writes an HTTP response with a valid Twirp error format, and triggers hooks.
 // If err is not a twirp.Error, it will get wrapped with twirp.InternalErrorWith(err)
-func (s *screenshoterServer) writeError(ctx context.Context, resp http.ResponseWriter, err error) {
+func (s *screenshotServer) writeError(ctx context.Context, resp http.ResponseWriter, err error) {
 	writeError(ctx, resp, err, s.hooks)
 }
 
-// ScreenshoterPathPrefix is used for all URL paths on a twirp Screenshoter server.
-// Requests are always: POST ScreenshoterPathPrefix/method
+// ScreenshotPathPrefix is used for all URL paths on a twirp Screenshot server.
+// Requests are always: POST ScreenshotPathPrefix/method
 // It can be used in an HTTP mux to route twirp requests along with non-twirp requests on other routes.
-const ScreenshoterPathPrefix = "/twirp/pressly.api.Screenshoter/"
+const ScreenshotPathPrefix = "/twirp/pressly.Screenshot/"
 
-func (s *screenshoterServer) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (s *screenshotServer) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-	ctx = ctxsetters.WithPackageName(ctx, "pressly.api")
-	ctx = ctxsetters.WithServiceName(ctx, "Screenshoter")
+	ctx = ctxsetters.WithPackageName(ctx, "pressly")
+	ctx = ctxsetters.WithServiceName(ctx, "Screenshot")
 	ctx = ctxsetters.WithResponseWriter(ctx, resp)
 
 	var err error
@@ -166,8 +166,8 @@ func (s *screenshoterServer) ServeHTTP(resp http.ResponseWriter, req *http.Reque
 	}
 
 	switch req.URL.Path {
-	case "/twirp/pressly.api.Screenshoter/Screenshot":
-		s.serveScreenshot(ctx, resp, req)
+	case "/twirp/pressly.Screenshot/Image":
+		s.serveImage(ctx, resp, req)
 		return
 	default:
 		msg := fmt.Sprintf("no handler for path %q", req.URL.Path)
@@ -177,7 +177,7 @@ func (s *screenshoterServer) ServeHTTP(resp http.ResponseWriter, req *http.Reque
 	}
 }
 
-func (s *screenshoterServer) serveScreenshot(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *screenshotServer) serveImage(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	header := req.Header.Get("Content-Type")
 	i := strings.Index(header, ";")
 	if i == -1 {
@@ -185,9 +185,9 @@ func (s *screenshoterServer) serveScreenshot(ctx context.Context, resp http.Resp
 	}
 	switch strings.TrimSpace(strings.ToLower(header[:i])) {
 	case "application/json":
-		s.serveScreenshotJSON(ctx, resp, req)
+		s.serveImageJSON(ctx, resp, req)
 	case "application/protobuf":
-		s.serveScreenshotProtobuf(ctx, resp, req)
+		s.serveImageProtobuf(ctx, resp, req)
 	default:
 		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
 		twerr := badRouteError(msg, req.Method, req.URL.Path)
@@ -195,16 +195,16 @@ func (s *screenshoterServer) serveScreenshot(ctx context.Context, resp http.Resp
 	}
 }
 
-func (s *screenshoterServer) serveScreenshotJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *screenshotServer) serveImageJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "Screenshot")
+	ctx = ctxsetters.WithMethodName(ctx, "Image")
 	ctx, err = callRequestRouted(ctx, s.hooks)
 	if err != nil {
 		s.writeError(ctx, resp, err)
 		return
 	}
 
-	reqContent := new(URL)
+	reqContent := new(RequestImage)
 	unmarshaler := jsonpb.Unmarshaler{AllowUnknownFields: true}
 	if err = unmarshaler.Unmarshal(req.Body, reqContent); err != nil {
 		err = wrapErr(err, "failed to parse request json")
@@ -213,7 +213,7 @@ func (s *screenshoterServer) serveScreenshotJSON(ctx context.Context, resp http.
 	}
 
 	// Call service method
-	var respContent *Empty
+	var respContent *Resp
 	func() {
 		defer func() {
 			// In case of a panic, serve a 500 error and then panic.
@@ -222,7 +222,7 @@ func (s *screenshoterServer) serveScreenshotJSON(ctx context.Context, resp http.
 				panic(r)
 			}
 		}()
-		respContent, err = s.Screenshoter.Screenshot(ctx, reqContent)
+		respContent, err = s.Screenshot.Image(ctx, reqContent)
 	}()
 
 	if err != nil {
@@ -230,7 +230,7 @@ func (s *screenshoterServer) serveScreenshotJSON(ctx context.Context, resp http.
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *Empty and nil error while calling Screenshot. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Resp and nil error while calling Image. nil responses are not supported"))
 		return
 	}
 
@@ -257,9 +257,9 @@ func (s *screenshoterServer) serveScreenshotJSON(ctx context.Context, resp http.
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *screenshoterServer) serveScreenshotProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *screenshotServer) serveImageProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "Screenshot")
+	ctx = ctxsetters.WithMethodName(ctx, "Image")
 	ctx, err = callRequestRouted(ctx, s.hooks)
 	if err != nil {
 		s.writeError(ctx, resp, err)
@@ -272,7 +272,7 @@ func (s *screenshoterServer) serveScreenshotProtobuf(ctx context.Context, resp h
 		s.writeError(ctx, resp, twirp.InternalErrorWith(err))
 		return
 	}
-	reqContent := new(URL)
+	reqContent := new(RequestImage)
 	if err = proto.Unmarshal(buf, reqContent); err != nil {
 		err = wrapErr(err, "failed to parse request proto")
 		s.writeError(ctx, resp, twirp.InternalErrorWith(err))
@@ -280,7 +280,7 @@ func (s *screenshoterServer) serveScreenshotProtobuf(ctx context.Context, resp h
 	}
 
 	// Call service method
-	var respContent *Empty
+	var respContent *Resp
 	func() {
 		defer func() {
 			// In case of a panic, serve a 500 error and then panic.
@@ -289,7 +289,7 @@ func (s *screenshoterServer) serveScreenshotProtobuf(ctx context.Context, resp h
 				panic(r)
 			}
 		}()
-		respContent, err = s.Screenshoter.Screenshot(ctx, reqContent)
+		respContent, err = s.Screenshot.Image(ctx, reqContent)
 	}()
 
 	if err != nil {
@@ -297,7 +297,7 @@ func (s *screenshoterServer) serveScreenshotProtobuf(ctx context.Context, resp h
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *Empty and nil error while calling Screenshot. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Resp and nil error while calling Image. nil responses are not supported"))
 		return
 	}
 
@@ -321,11 +321,11 @@ func (s *screenshoterServer) serveScreenshotProtobuf(ctx context.Context, resp h
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *screenshoterServer) ServiceDescriptor() ([]byte, int) {
+func (s *screenshotServer) ServiceDescriptor() ([]byte, int) {
 	return twirpFileDescriptor0, 0
 }
 
-func (s *screenshoterServer) ProtocGenTwirpVersion() string {
+func (s *screenshotServer) ProtocGenTwirpVersion() string {
 	return "v5.5.0"
 }
 
@@ -750,15 +750,15 @@ func callError(ctx context.Context, h *twirp.ServerHooks, err twirp.Error) conte
 }
 
 var twirpFileDescriptor0 = []byte{
-	// 145 bytes of a gzipped FileDescriptorProto
+	// 155 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x29, 0x2a, 0x48, 0xd6,
 	0x2f, 0x4e, 0x2e, 0x4a, 0x4d, 0xcd, 0x2b, 0xce, 0xc8, 0x2f, 0xd1, 0x2f, 0x4e, 0x2d, 0x2a, 0xcb,
-	0x4c, 0x4e, 0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x2e, 0x28, 0x4a, 0x2d, 0x2e, 0xce,
-	0xa9, 0xd4, 0x4b, 0x2c, 0xc8, 0x54, 0x92, 0xe7, 0x62, 0x0e, 0x0d, 0xf2, 0x11, 0x92, 0xe0, 0x62,
-	0x2f, 0x2e, 0x4d, 0xca, 0x4a, 0x4d, 0x2e, 0x91, 0x60, 0x54, 0x60, 0xd4, 0xe0, 0x0c, 0x82, 0x71,
-	0x95, 0xd8, 0xb9, 0x58, 0x5d, 0x73, 0x0b, 0x4a, 0x2a, 0x8d, 0x9c, 0xb8, 0x78, 0x82, 0xe1, 0x46,
-	0xa6, 0x16, 0x09, 0x19, 0x71, 0x71, 0x21, 0xf8, 0x42, 0x02, 0x7a, 0x48, 0xa6, 0xea, 0x85, 0x06,
-	0xf9, 0x48, 0x09, 0xa1, 0x88, 0x80, 0xcd, 0x70, 0xe2, 0x89, 0xe2, 0x42, 0x38, 0x2b, 0x89, 0x0d,
-	0xec, 0x1e, 0x63, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x30, 0xb8, 0xb5, 0x46, 0xaf, 0x00, 0x00,
-	0x00,
+	0x4c, 0x4e, 0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x2f, 0x28, 0x4a, 0x2d, 0x2e, 0xce,
+	0xa9, 0x54, 0x52, 0xe0, 0xe2, 0x09, 0x4a, 0x2d, 0x2c, 0x4d, 0x2d, 0x2e, 0xf1, 0xcc, 0x4d, 0x4c,
+	0x4f, 0x15, 0x12, 0xe0, 0x62, 0x2e, 0x2d, 0xca, 0x91, 0x60, 0x54, 0x60, 0xd4, 0xe0, 0x0c, 0x02,
+	0x31, 0x95, 0xa4, 0xb8, 0x58, 0x82, 0x52, 0x8b, 0x0b, 0x84, 0x84, 0xb8, 0x58, 0x8a, 0x52, 0x8b,
+	0x0b, 0xc0, 0x52, 0x3c, 0x41, 0x60, 0xb6, 0x91, 0x35, 0x17, 0x57, 0x30, 0xdc, 0x0a, 0x21, 0x5d,
+	0x2e, 0x56, 0x88, 0x21, 0xa2, 0x7a, 0x50, 0xe3, 0xf5, 0x90, 0xcd, 0x96, 0xe2, 0x45, 0x12, 0x2e,
+	0x2e, 0x70, 0xe2, 0x89, 0xe2, 0x42, 0xb8, 0x2f, 0x89, 0x0d, 0xec, 0x30, 0x63, 0x40, 0x00, 0x00,
+	0x00, 0xff, 0xff, 0xdd, 0xa3, 0x21, 0x50, 0xb8, 0x00, 0x00, 0x00,
 }

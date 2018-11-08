@@ -18,91 +18,99 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type URL struct {
-	Subject              string   `protobuf:"bytes,1,opt,name=subject,proto3" json:"subject,omitempty"`
+type RequestImage struct {
+	Url                  string   `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *URL) Reset()         { *m = URL{} }
-func (m *URL) String() string { return proto.CompactTextString(m) }
-func (*URL) ProtoMessage()    {}
-func (*URL) Descriptor() ([]byte, []int) {
+func (m *RequestImage) Reset()         { *m = RequestImage{} }
+func (m *RequestImage) String() string { return proto.CompactTextString(m) }
+func (*RequestImage) ProtoMessage()    {}
+func (*RequestImage) Descriptor() ([]byte, []int) {
 	return fileDescriptor_ecff0a2cf2aeb787, []int{0}
 }
-func (m *URL) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_URL.Unmarshal(m, b)
+func (m *RequestImage) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RequestImage.Unmarshal(m, b)
 }
-func (m *URL) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_URL.Marshal(b, m, deterministic)
+func (m *RequestImage) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RequestImage.Marshal(b, m, deterministic)
 }
-func (m *URL) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_URL.Merge(m, src)
+func (m *RequestImage) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RequestImage.Merge(m, src)
 }
-func (m *URL) XXX_Size() int {
-	return xxx_messageInfo_URL.Size(m)
+func (m *RequestImage) XXX_Size() int {
+	return xxx_messageInfo_RequestImage.Size(m)
 }
-func (m *URL) XXX_DiscardUnknown() {
-	xxx_messageInfo_URL.DiscardUnknown(m)
+func (m *RequestImage) XXX_DiscardUnknown() {
+	xxx_messageInfo_RequestImage.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_URL proto.InternalMessageInfo
+var xxx_messageInfo_RequestImage proto.InternalMessageInfo
 
-func (m *URL) GetSubject() string {
+func (m *RequestImage) GetUrl() string {
 	if m != nil {
-		return m.Subject
+		return m.Url
 	}
 	return ""
 }
 
-type Empty struct {
+type Resp struct {
+	Resp                 []byte   `protobuf:"bytes,1,opt,name=resp,proto3" json:"resp,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *Empty) Reset()         { *m = Empty{} }
-func (m *Empty) String() string { return proto.CompactTextString(m) }
-func (*Empty) ProtoMessage()    {}
-func (*Empty) Descriptor() ([]byte, []int) {
+func (m *Resp) Reset()         { *m = Resp{} }
+func (m *Resp) String() string { return proto.CompactTextString(m) }
+func (*Resp) ProtoMessage()    {}
+func (*Resp) Descriptor() ([]byte, []int) {
 	return fileDescriptor_ecff0a2cf2aeb787, []int{1}
 }
-func (m *Empty) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Empty.Unmarshal(m, b)
+func (m *Resp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Resp.Unmarshal(m, b)
 }
-func (m *Empty) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Empty.Marshal(b, m, deterministic)
+func (m *Resp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Resp.Marshal(b, m, deterministic)
 }
-func (m *Empty) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Empty.Merge(m, src)
+func (m *Resp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Resp.Merge(m, src)
 }
-func (m *Empty) XXX_Size() int {
-	return xxx_messageInfo_Empty.Size(m)
+func (m *Resp) XXX_Size() int {
+	return xxx_messageInfo_Resp.Size(m)
 }
-func (m *Empty) XXX_DiscardUnknown() {
-	xxx_messageInfo_Empty.DiscardUnknown(m)
+func (m *Resp) XXX_DiscardUnknown() {
+	xxx_messageInfo_Resp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_Empty proto.InternalMessageInfo
+var xxx_messageInfo_Resp proto.InternalMessageInfo
+
+func (m *Resp) GetResp() []byte {
+	if m != nil {
+		return m.Resp
+	}
+	return nil
+}
 
 func init() {
-	proto.RegisterType((*URL)(nil), "pressly.api.URL")
-	proto.RegisterType((*Empty)(nil), "pressly.api.Empty")
+	proto.RegisterType((*RequestImage)(nil), "pressly.RequestImage")
+	proto.RegisterType((*Resp)(nil), "pressly.Resp")
 }
 
 func init() { proto.RegisterFile("rpc/screenshot/service.proto", fileDescriptor_ecff0a2cf2aeb787) }
 
 var fileDescriptor_ecff0a2cf2aeb787 = []byte{
-	// 145 bytes of a gzipped FileDescriptorProto
+	// 155 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x29, 0x2a, 0x48, 0xd6,
 	0x2f, 0x4e, 0x2e, 0x4a, 0x4d, 0xcd, 0x2b, 0xce, 0xc8, 0x2f, 0xd1, 0x2f, 0x4e, 0x2d, 0x2a, 0xcb,
-	0x4c, 0x4e, 0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x2e, 0x28, 0x4a, 0x2d, 0x2e, 0xce,
-	0xa9, 0xd4, 0x4b, 0x2c, 0xc8, 0x54, 0x92, 0xe7, 0x62, 0x0e, 0x0d, 0xf2, 0x11, 0x92, 0xe0, 0x62,
-	0x2f, 0x2e, 0x4d, 0xca, 0x4a, 0x4d, 0x2e, 0x91, 0x60, 0x54, 0x60, 0xd4, 0xe0, 0x0c, 0x82, 0x71,
-	0x95, 0xd8, 0xb9, 0x58, 0x5d, 0x73, 0x0b, 0x4a, 0x2a, 0x8d, 0x9c, 0xb8, 0x78, 0x82, 0xe1, 0x46,
-	0xa6, 0x16, 0x09, 0x19, 0x71, 0x71, 0x21, 0xf8, 0x42, 0x02, 0x7a, 0x48, 0xa6, 0xea, 0x85, 0x06,
-	0xf9, 0x48, 0x09, 0xa1, 0x88, 0x80, 0xcd, 0x70, 0xe2, 0x89, 0xe2, 0x42, 0x38, 0x2b, 0x89, 0x0d,
-	0xec, 0x1e, 0x63, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x30, 0xb8, 0xb5, 0x46, 0xaf, 0x00, 0x00,
-	0x00,
+	0x4c, 0x4e, 0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x2f, 0x28, 0x4a, 0x2d, 0x2e, 0xce,
+	0xa9, 0x54, 0x52, 0xe0, 0xe2, 0x09, 0x4a, 0x2d, 0x2c, 0x4d, 0x2d, 0x2e, 0xf1, 0xcc, 0x4d, 0x4c,
+	0x4f, 0x15, 0x12, 0xe0, 0x62, 0x2e, 0x2d, 0xca, 0x91, 0x60, 0x54, 0x60, 0xd4, 0xe0, 0x0c, 0x02,
+	0x31, 0x95, 0xa4, 0xb8, 0x58, 0x82, 0x52, 0x8b, 0x0b, 0x84, 0x84, 0xb8, 0x58, 0x8a, 0x52, 0x8b,
+	0x0b, 0xc0, 0x52, 0x3c, 0x41, 0x60, 0xb6, 0x91, 0x35, 0x17, 0x57, 0x30, 0xdc, 0x0a, 0x21, 0x5d,
+	0x2e, 0x56, 0x88, 0x21, 0xa2, 0x7a, 0x50, 0xe3, 0xf5, 0x90, 0xcd, 0x96, 0xe2, 0x45, 0x12, 0x2e,
+	0x2e, 0x70, 0xe2, 0x89, 0xe2, 0x42, 0xb8, 0x2f, 0x89, 0x0d, 0xec, 0x30, 0x63, 0x40, 0x00, 0x00,
+	0x00, 0xff, 0xff, 0xdd, 0xa3, 0x21, 0x50, 0xb8, 0x00, 0x00, 0x00,
 }

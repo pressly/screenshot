@@ -2,17 +2,18 @@ package screenshotserver
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"log"
+	"time"
 
 	"github.com/chromedp/chromedp"
 	pb "github.com/pressly/screenshot/rpc/screenshot"
+	"github.com/twitchtv/twirp"
 )
 
 type Server struct{}
 
-func (s *Server) Screenshot(ctx context.Context, pageURL *pb.URL) (*pb.Empty, error) {
+func (s *Server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, error) {
 	// create context
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -20,18 +21,27 @@ func (s *Server) Screenshot(ctx context.Context, pageURL *pb.URL) (*pb.Empty, er
 	cdp, teardown := newChromeInstance(ctx)
 	defer teardown()
 
-	fmt.Println(pageURL.String())
 	// run task list
 	var buf []byte
-	if err := cdp.Run(ctx, chromedp.CaptureScreenshot(&buf)); err != nil {
+	if err := cdp.Run(ctx,
+		chromedp.Tasks{
+			chromedp.Navigate(req.Url),
+			chromedp.Sleep(3 * time.Second),
+			chromedp.WaitReady("body"),
+			chromedp.CaptureScreenshot(&buf)}); err != nil {
 		log.Fatalln(err)
 	}
 
-	if err := ioutil.WriteFile("sample.png", buf, 0644); err != nil {
+	if err := ioutil.WriteFile("img/sample.png", buf, 0644); err != nil {
 		log.Fatalln(err)
 	}
 
-	return &pb.Empty{}, nil
+	err := twirp.SetHTTPResponseHeader(ctx, "Content-Type", "image/png")
+	if err != nil {
+		return nil, twirp.InternalErrorWith(err)
+	}
+
+	return &pb.Resp{}, nil
 }
 
 func newChromeInstance(ctx context.Context) (*chromedp.CDP, func()) {
