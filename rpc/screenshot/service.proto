@@ -1,0 +1,15 @@
+syntax = "proto3";
+package pressly.api;
+option go_package = "screenshot";
+
+// Screenshoter service takes a screenshots of web pages.
+service Screenshoter {
+    // Screenshot takes a URL and produces a screenshot of that page.
+    rpc Screenshot(URL) returns (Empty);
+}
+
+message URL {
+    string subject = 1;
+}
+
+message Empty {}
