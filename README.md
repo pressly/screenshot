@@ -17,11 +17,13 @@ A simple scalable server built on top of Headless Chrome. The API is built with 
 - https://github.com/GoogleChrome/puppeteer/blob/fae441cd42fc410115ce9cec40563e21260db9b6/docs/troubleshooting.md#running-puppeteer-in-docker
 - anything else?
 
-# Installation
+# Usage
 
-twirp setup steps:
+1. `docker run -d -p 9222:9222 --cap-add=SYS_ADMIN justinribeiro/chrome-headless`
 
-https://twitchtv.github.io/twirp/docs/install.html
+# Development
+
+1. Install tools to work with [Protocol Buffers and Twirp](https://twitchtv.github.io/twirp/docs/install.html).
 
 # License
 
