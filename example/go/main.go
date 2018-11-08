@@ -37,7 +37,7 @@ func main() {
 		}
 
 		name := fmt.Sprintf("%s_%s.png", u.Hostname(), time.Now().Format(time.RFC3339))
-		if err := ioutil.WriteFile(filepath.Join("img", name), resp.Resp, 0644); err != nil {
+		if err := ioutil.WriteFile(filepath.Join("example/go/img", name), resp.Resp, 0644); err != nil {
 			log.Fatalln(err)
 		}
 	}
