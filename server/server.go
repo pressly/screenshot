@@ -57,18 +57,11 @@ func (s *server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, err
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	c, err := headless.New(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer c.Close()
-
 	if req.Window == "" {
 		req.Window = "800x600"
 	}
 
 	window, err := parseResolution(req.Window)
-
 	image, err := s.chrome.NewImage(ctx, req.Url, float64(req.X), float64(req.Y), window.width, window.height)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse window: %s", req.Window)

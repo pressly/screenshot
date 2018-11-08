@@ -37,11 +37,16 @@ func (c *Chrome) Close() {
 func (c *Chrome) NewImage(ctx context.Context, addr string, x, y, width, height float64) ([]byte, error) {
 	// run task list
 
+	var buf []byte
 	err := c.Run(ctx,
 		chromedp.Tasks{
 			chromedp.Navigate(addr),
 			chromedp.WaitReady("body"),
+			chromedp.CaptureScreenshot(&buf),
 		})
+	if err != nil {
+		return nil, err
+	}
 
 	currentTarget := c.GetHandlerByIndex(0)
 	image, err := page.CaptureScreenshot().Do(ctx, currentTarget)
