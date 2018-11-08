@@ -17,10 +17,6 @@ func (s *Server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, err
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-
-	chrome, headless.NewImage
-
-
 	cdp, teardown := newChromeInstance(ctx)
 	defer teardown()
 
