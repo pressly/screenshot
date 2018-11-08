@@ -23,7 +23,7 @@ func New(ctx context.Context) (*Chrome, error) {
 	return &Chrome{c, ctx}, nil
 }
 
-func (c *Chrome) Teardown() {
+func (c *Chrome) Close() {
 	// shutdown chrome
 	if err := c.Shutdown(c.ctx); err != nil {
 		log.Println(err)

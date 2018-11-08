@@ -11,7 +11,18 @@ import (
 	pb "github.com/pressly/screenshot/rpc/screenshot"
 )
 
-type Server struct{}
+type server struct {
+	chrome *headless.Chrome
+}
+
+func New() (*server, error) {
+	chrome, err := headless.New(context.TODO())
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to init headless")
+	}
+
+	return &server{chrome: chrome}, nil
+}
 
 type resolution struct {
 	width  float64
@@ -37,7 +48,11 @@ func parseResolution(s string) (*resolution, error) {
 	}, nil
 }
 
-func (s *Server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, error) {
+func (s *server) Close() {
+	s.chrome.Close()
+}
+
+func (s *server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, error) {
 	// create context
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -46,20 +61,17 @@ func (s *Server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, err
 	if err != nil {
 		return nil, err
 	}
-	defer c.Teardown()
+	defer c.Close()
 
 	if req.Window == "" {
 		req.Window = "800x600"
 	}
 
 	window, err := parseResolution(req.Window)
+
+	image, err := s.chrome.NewImage(ctx, req.Url, float64(req.X), float64(req.Y), window.width, window.height)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse window: %s", req.Window)
-	}
-
-	image, err := c.NewImage(ctx, req.Url, float64(req.X), float64(req.Y), window.width, window.height)
-	if err != nil {
-		return nil, err
 	}
 
 	return &pb.Resp{

@@ -9,8 +9,12 @@ import (
 )
 
 func main() {
+	srv, err := server.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer srv.Close()
 
-	srv := &server.Server{}
 	twirpHandler := screenshot.NewScreenshotServer(srv, nil)
 
 	log.Fatal(http.ListenAndServe(":6666", twirpHandler))
