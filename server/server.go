@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"io/ioutil"
-	"log"
 
 	"github.com/pressly/screenshot/lib/headless"
 	pb "github.com/pressly/screenshot/rpc/screenshot"
@@ -31,9 +30,5 @@ func (s *Server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, err
 		return nil, err
 	}
 
-	if err := ioutil.WriteFile("img/sample.png", by, 0644); err != nil {
-		log.Fatalln(err)
-	}
-
-	return &pb.Resp{}, nil
+	return &pb.Resp{Resp: by}, nil
 }
