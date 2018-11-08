@@ -49,7 +49,13 @@ func (c *Chrome) NewImage(ctx context.Context, addr string, x, y, width, height 
 	}
 
 	currentTarget := c.GetHandlerByIndex(0)
-	image, err := page.CaptureScreenshot().Do(ctx, currentTarget)
+	image, err := page.CaptureScreenshot().WithClip(&page.Viewport{
+		X:      x,
+		Y:      y,
+		Width:  width,
+		Height: height,
+		Scale:  1.0,
+	}).Do(ctx, currentTarget)
 	if err != nil {
 		return nil, err
 	}
