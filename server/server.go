@@ -8,9 +8,14 @@ import (
 	pb "github.com/pressly/screenshot/rpc/screenshot"
 )
 
-type Server struct{}
+type server struct {
+}
 
-func (s *Server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, error) {
+func New() *server {
+	return &server{}
+}
+
+func (s *server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, error) {
 	// create context
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
