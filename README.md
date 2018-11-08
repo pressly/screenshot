@@ -19,7 +19,8 @@ A simple scalable server built on top of Headless Chrome. The API is built with 
 
 # Usage
 
-1. `docker run -d -p 9222:9222 --cap-add=SYS_ADMIN justinribeiro/chrome-headless`
+1. So far, this project works with [Chrome Canary](https://www.google.com/chrome/canary/) `/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary --headless --remote-debugging-port=9222 --no-gpu` 
+2. However, it doesn't work with `docker run --name=chrome -p 9222:9222 --cap-add=SYS_ADMIN justinribeiro/chrome-headless --headless --remote-debugging-port=9222 --disable-gpu`, which is strange.. trying to figure that out
 
 # Development
 
