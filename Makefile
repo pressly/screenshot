@@ -5,6 +5,9 @@ endef
 run:
 	@$(MAKE) proto
 	$(call run,screenshot)
-	
+
+run-example:
+	rerun -watch ./ -ignore bin vendor rpc -run sh -c 'sleep 1; go run ./example/go/main.go http://google.com google.png && open google.png'
+
 proto:
 	protoc --twirp_out=. --go_out=. ./rpc/screenshot/service.proto
