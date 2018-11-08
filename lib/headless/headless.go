@@ -5,7 +5,6 @@ import (
 	"context"
 	"io"
 	"log"
-	"time"
 
 	"github.com/chromedp/chromedp"
 	"github.com/pkg/errors"
@@ -42,7 +41,6 @@ func (c *Chrome) NewImage(ctx context.Context, addr string) (io.Reader, error) {
 	err := c.Run(ctx,
 		chromedp.Tasks{
 			chromedp.Navigate(addr),
-			chromedp.Sleep(3 * time.Second),
 			chromedp.WaitReady("body"),
 			chromedp.CaptureScreenshot(&buf)},
 	)
