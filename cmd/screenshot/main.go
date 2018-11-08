@@ -9,7 +9,11 @@ import (
 )
 
 func main() {
-	srv := server.New()
+	srv, err := server.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer srv.Close()
 
 	twirpHandler := screenshot.NewScreenshotServer(srv, nil)
 

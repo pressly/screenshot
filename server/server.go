@@ -4,15 +4,26 @@ import (
 	"context"
 	"io/ioutil"
 
+	"github.com/pkg/errors"
 	"github.com/pressly/screenshot/lib/headless"
 	pb "github.com/pressly/screenshot/rpc/screenshot"
 )
 
 type server struct {
+	chrome *headless.Chrome
 }
 
-func New() *server {
-	return &server{}
+func New() (*server, error) {
+	chrome, err := headless.New(context.TODO())
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to init headless")
+	}
+
+	return &server{chrome: chrome}, nil
+}
+
+func (s *server) Close() {
+	s.chrome.Close()
 }
 
 func (s *server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, error) {
@@ -20,13 +31,7 @@ func (s *server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, err
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	c, err := headless.New(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer c.Teardown()
-
-	r, err := c.NewImage(ctx, req.Url)
+	r, err := s.chrome.NewImage(ctx, req.Url)
 	if err != nil {
 		return nil, err
 	}
