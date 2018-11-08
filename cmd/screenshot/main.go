@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/pressly/screenshot/internal/server"
 	"github.com/pressly/screenshot/rpc/screenshot"
+	"github.com/pressly/screenshot/server"
 )
 
 func main() {
