@@ -8,7 +8,7 @@ service Screenshot {
     rpc Image(RequestImage) returns (Resp);
     
     // Image takes a URL and produces a screenshot of that page.
-    rpc PDF(RequestPDF) returns (Resp);
+    // rpc PDF(RequestImage) returns (Resp);
 }
 
 message RequestImage {
