@@ -10,13 +10,6 @@ A simple scalable server built on top of Headless Chrome. The API is built with 
 4. Built-in & configurable request throttling
 5. Generate functional client in Go, JS (Typescript) and maybe other languages
 
-## Base image candidates:
-- https://hub.docker.com/r/justinribeiro/chrome-headless/
-- https://hub.docker.com/r/selenoid/chrome/
-- https://hub.docker.com/r/browserless/chrome/
-- https://github.com/GoogleChrome/puppeteer/blob/fae441cd42fc410115ce9cec40563e21260db9b6/docs/troubleshooting.md#running-puppeteer-in-docker
-- anything else?
-
 # Usage
 
 1. So far, this project works with [Chrome Canary](https://www.google.com/chrome/canary/) `/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary --headless --remote-debugging-port=9222 --no-gpu` 
