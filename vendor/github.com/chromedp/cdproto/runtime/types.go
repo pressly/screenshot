@@ -53,11 +53,8 @@ type RemoteObject struct {
 
 // CustomPreview [no description].
 type CustomPreview struct {
-	Header                     string         `json:"header"`
-	HasBody                    bool           `json:"hasBody"`
-	FormatterObjectID          RemoteObjectID `json:"formatterObjectId"`
-	BindRemoteObjectFunctionID RemoteObjectID `json:"bindRemoteObjectFunctionId"`
-	ConfigObjectID             RemoteObjectID `json:"configObjectId,omitempty"`
+	Header       string         `json:"header"`                 // The JSON-stringified result of formatter.header(object, config) call. It contains json ML array that represents RemoteObject.
+	BodyGetterID RemoteObjectID `json:"bodyGetterId,omitempty"` // If formatter returns true as a result of formatter.hasBody call then bodyGetterId will contain RemoteObjectId for the function that returns result of formatter.body(object, config) call. The result value is json ML array.
 }
 
 // ObjectPreview object containing abbreviated remote object value.
@@ -297,21 +294,23 @@ func (t Subtype) String() string {
 
 // Subtype values.
 const (
-	SubtypeArray      Subtype = "array"
-	SubtypeNull       Subtype = "null"
-	SubtypeNode       Subtype = "node"
-	SubtypeRegexp     Subtype = "regexp"
-	SubtypeDate       Subtype = "date"
-	SubtypeMap        Subtype = "map"
-	SubtypeSet        Subtype = "set"
-	SubtypeWeakmap    Subtype = "weakmap"
-	SubtypeWeakset    Subtype = "weakset"
-	SubtypeIterator   Subtype = "iterator"
-	SubtypeGenerator  Subtype = "generator"
-	SubtypeError      Subtype = "error"
-	SubtypeProxy      Subtype = "proxy"
-	SubtypePromise    Subtype = "promise"
-	SubtypeTypedarray Subtype = "typedarray"
+	SubtypeArray       Subtype = "array"
+	SubtypeNull        Subtype = "null"
+	SubtypeNode        Subtype = "node"
+	SubtypeRegexp      Subtype = "regexp"
+	SubtypeDate        Subtype = "date"
+	SubtypeMap         Subtype = "map"
+	SubtypeSet         Subtype = "set"
+	SubtypeWeakmap     Subtype = "weakmap"
+	SubtypeWeakset     Subtype = "weakset"
+	SubtypeIterator    Subtype = "iterator"
+	SubtypeGenerator   Subtype = "generator"
+	SubtypeError       Subtype = "error"
+	SubtypeProxy       Subtype = "proxy"
+	SubtypePromise     Subtype = "promise"
+	SubtypeTypedarray  Subtype = "typedarray"
+	SubtypeArraybuffer Subtype = "arraybuffer"
+	SubtypeDataview    Subtype = "dataview"
 )
 
 // MarshalEasyJSON satisfies easyjson.Marshaler.
@@ -357,6 +356,10 @@ func (t *Subtype) UnmarshalEasyJSON(in *jlexer.Lexer) {
 		*t = SubtypePromise
 	case SubtypeTypedarray:
 		*t = SubtypeTypedarray
+	case SubtypeArraybuffer:
+		*t = SubtypeArraybuffer
+	case SubtypeDataview:
+		*t = SubtypeDataview
 
 	default:
 		in.AddError(errors.New("unknown Subtype value"))

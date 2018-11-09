@@ -1443,6 +1443,16 @@ func easyjsonC5a4559bDecodeGithubComChromedpCdprotoDomsnapshot6(in *jlexer.Lexer
 				}
 				in.Delim(']')
 			}
+		case "stackingContexts":
+			if in.IsNull() {
+				in.Skip()
+				out.StackingContexts = nil
+			} else {
+				if out.StackingContexts == nil {
+					out.StackingContexts = new(RareBooleanData)
+				}
+				(*out.StackingContexts).UnmarshalEasyJSON(in)
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -1563,6 +1573,20 @@ func easyjsonC5a4559bEncodeGithubComChromedpCdprotoDomsnapshot6(out *jwriter.Wri
 			out.RawByte(']')
 		}
 	}
+	{
+		const prefix string = ",\"stackingContexts\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.StackingContexts == nil {
+			out.RawString("null")
+		} else {
+			(*in.StackingContexts).MarshalEasyJSON(out)
+		}
+	}
 	out.RawByte('}')
 }
 
@@ -1657,6 +1681,8 @@ func easyjsonC5a4559bDecodeGithubComChromedpCdprotoDomsnapshot7(in *jlexer.Lexer
 			out.StyleIndex = int64(in.Int64())
 		case "paintOrder":
 			out.PaintOrder = int64(in.Int64())
+		case "isStackingContext":
+			out.IsStackingContext = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -1747,6 +1773,16 @@ func easyjsonC5a4559bEncodeGithubComChromedpCdprotoDomsnapshot7(out *jwriter.Wri
 			out.RawString(prefix)
 		}
 		out.Int64(int64(in.PaintOrder))
+	}
+	if in.IsStackingContext {
+		const prefix string = ",\"isStackingContext\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.IsStackingContext))
 	}
 	out.RawByte('}')
 }
@@ -2003,6 +2039,10 @@ func easyjsonC5a4559bDecodeGithubComChromedpCdprotoDomsnapshot10(in *jlexer.Lexe
 				}
 				(*out.TextBoxes).UnmarshalEasyJSON(in)
 			}
+		case "scrollOffsetX":
+			out.ScrollOffsetX = float64(in.Float64())
+		case "scrollOffsetY":
+			out.ScrollOffsetY = float64(in.Float64())
 		default:
 			in.SkipRecursive()
 		}
@@ -2128,6 +2168,26 @@ func easyjsonC5a4559bEncodeGithubComChromedpCdprotoDomsnapshot10(out *jwriter.Wr
 		} else {
 			(*in.TextBoxes).MarshalEasyJSON(out)
 		}
+	}
+	if in.ScrollOffsetX != 0 {
+		const prefix string = ",\"scrollOffsetX\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Float64(float64(in.ScrollOffsetX))
+	}
+	if in.ScrollOffsetY != 0 {
+		const prefix string = ",\"scrollOffsetY\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Float64(float64(in.ScrollOffsetY))
 	}
 	out.RawByte('}')
 }
@@ -2385,6 +2445,10 @@ func easyjsonC5a4559bDecodeGithubComChromedpCdprotoDomsnapshot12(in *jlexer.Lexe
 			out.CurrentSourceURL = string(in.String())
 		case "originURL":
 			out.OriginURL = string(in.String())
+		case "scrollOffsetX":
+			out.ScrollOffsetX = float64(in.Float64())
+		case "scrollOffsetY":
+			out.ScrollOffsetY = float64(in.Float64())
 		default:
 			in.SkipRecursive()
 		}
@@ -2702,6 +2766,26 @@ func easyjsonC5a4559bEncodeGithubComChromedpCdprotoDomsnapshot12(out *jwriter.Wr
 			out.RawString(prefix)
 		}
 		out.String(string(in.OriginURL))
+	}
+	if in.ScrollOffsetX != 0 {
+		const prefix string = ",\"scrollOffsetX\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Float64(float64(in.ScrollOffsetX))
+	}
+	if in.ScrollOffsetY != 0 {
+		const prefix string = ",\"scrollOffsetY\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Float64(float64(in.ScrollOffsetY))
 	}
 	out.RawByte('}')
 }

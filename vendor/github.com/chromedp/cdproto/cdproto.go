@@ -28,6 +28,7 @@ import (
 	"github.com/chromedp/cdproto/domsnapshot"
 	"github.com/chromedp/cdproto/domstorage"
 	"github.com/chromedp/cdproto/emulation"
+	"github.com/chromedp/cdproto/fetch"
 	"github.com/chromedp/cdproto/headlessexperimental"
 	"github.com/chromedp/cdproto/heapprofiler"
 	"github.com/chromedp/cdproto/indexeddb"
@@ -48,6 +49,7 @@ import (
 	"github.com/chromedp/cdproto/storage"
 	"github.com/chromedp/cdproto/systeminfo"
 	"github.com/chromedp/cdproto/target"
+	"github.com/chromedp/cdproto/testing"
 	"github.com/chromedp/cdproto/tethering"
 	"github.com/chromedp/cdproto/tracing"
 	"github.com/mailru/easyjson"
@@ -69,7 +71,10 @@ func (t MethodType) Domain() string {
 
 // MethodType values.
 const (
+	CommandAccessibilityDisable                            = accessibility.CommandDisable
+	CommandAccessibilityEnable                             = accessibility.CommandEnable
 	CommandAccessibilityGetPartialAXTree                   = accessibility.CommandGetPartialAXTree
+	CommandAccessibilityGetFullAXTree                      = accessibility.CommandGetFullAXTree
 	CommandAnimationDisable                                = animation.CommandDisable
 	CommandAnimationEnable                                 = animation.CommandEnable
 	CommandAnimationGetCurrentTime                         = animation.CommandGetCurrentTime
@@ -90,7 +95,10 @@ const (
 	EventApplicationCacheApplicationCacheStatusUpdated     = "ApplicationCache.applicationCacheStatusUpdated"
 	EventApplicationCacheNetworkStateUpdated               = "ApplicationCache.networkStateUpdated"
 	CommandAuditsGetEncodedResponse                        = audits.CommandGetEncodedResponse
+	CommandBrowserGrantPermissions                         = browser.CommandGrantPermissions
+	CommandBrowserResetPermissions                         = browser.CommandResetPermissions
 	CommandBrowserClose                                    = browser.CommandClose
+	CommandBrowserCrash                                    = browser.CommandCrash
 	CommandBrowserGetVersion                               = browser.CommandGetVersion
 	CommandBrowserGetBrowserCommandLine                    = browser.CommandGetBrowserCommandLine
 	CommandBrowserGetHistograms                            = browser.CommandGetHistograms
@@ -249,6 +257,7 @@ const (
 	CommandEmulationClearDeviceMetricsOverride             = emulation.CommandClearDeviceMetricsOverride
 	CommandEmulationClearGeolocationOverride               = emulation.CommandClearGeolocationOverride
 	CommandEmulationResetPageScaleFactor                   = emulation.CommandResetPageScaleFactor
+	CommandEmulationSetFocusEmulationEnabled               = emulation.CommandSetFocusEmulationEnabled
 	CommandEmulationSetCPUThrottlingRate                   = emulation.CommandSetCPUThrottlingRate
 	CommandEmulationSetDefaultBackgroundColorOverride      = emulation.CommandSetDefaultBackgroundColorOverride
 	CommandEmulationSetDeviceMetricsOverride               = emulation.CommandSetDeviceMetricsOverride
@@ -265,6 +274,16 @@ const (
 	EventEmulationVirtualTimeAdvanced                      = "Emulation.virtualTimeAdvanced"
 	EventEmulationVirtualTimeBudgetExpired                 = "Emulation.virtualTimeBudgetExpired"
 	EventEmulationVirtualTimePaused                        = "Emulation.virtualTimePaused"
+	CommandFetchDisable                                    = fetch.CommandDisable
+	CommandFetchEnable                                     = fetch.CommandEnable
+	CommandFetchFailRequest                                = fetch.CommandFailRequest
+	CommandFetchFulfillRequest                             = fetch.CommandFulfillRequest
+	CommandFetchContinueRequest                            = fetch.CommandContinueRequest
+	CommandFetchContinueWithAuth                           = fetch.CommandContinueWithAuth
+	CommandFetchGetResponseBody                            = fetch.CommandGetResponseBody
+	CommandFetchTakeResponseBodyAsStream                   = fetch.CommandTakeResponseBodyAsStream
+	EventFetchRequestPaused                                = "Fetch.requestPaused"
+	EventFetchAuthRequired                                 = "Fetch.authRequired"
 	CommandHeadlessExperimentalBeginFrame                  = headlessexperimental.CommandBeginFrame
 	CommandHeadlessExperimentalDisable                     = headlessexperimental.CommandDisable
 	CommandHeadlessExperimentalEnable                      = headlessexperimental.CommandEnable
@@ -298,6 +317,7 @@ const (
 	CommandIndexedDBRequestDatabase                        = indexeddb.CommandRequestDatabase
 	CommandIndexedDBRequestDatabaseNames                   = indexeddb.CommandRequestDatabaseNames
 	CommandInputDispatchKeyEvent                           = input.CommandDispatchKeyEvent
+	CommandInputInsertText                                 = input.CommandInsertText
 	CommandInputDispatchMouseEvent                         = input.CommandDispatchMouseEvent
 	CommandInputDispatchTouchEvent                         = input.CommandDispatchTouchEvent
 	CommandInputEmulateTouchFromMouseEvent                 = input.CommandEmulateTouchFromMouseEvent
@@ -430,6 +450,10 @@ const (
 	CommandPageClose                                       = page.CommandClose
 	CommandPageSetWebLifecycleState                        = page.CommandSetWebLifecycleState
 	CommandPageStopScreencast                              = page.CommandStopScreencast
+	CommandPageSetProduceCompilationCache                  = page.CommandSetProduceCompilationCache
+	CommandPageAddCompilationCache                         = page.CommandAddCompilationCache
+	CommandPageClearCompilationCache                       = page.CommandClearCompilationCache
+	CommandPageGenerateTestReport                          = page.CommandGenerateTestReport
 	EventPageDomContentEventFired                          = "Page.domContentEventFired"
 	EventPageFrameAttached                                 = "Page.frameAttached"
 	EventPageFrameClearedScheduledNavigation               = "Page.frameClearedScheduledNavigation"
@@ -449,8 +473,10 @@ const (
 	EventPageScreencastFrame                               = "Page.screencastFrame"
 	EventPageScreencastVisibilityChanged                   = "Page.screencastVisibilityChanged"
 	EventPageWindowOpen                                    = "Page.windowOpen"
+	EventPageCompilationCacheProduced                      = "Page.compilationCacheProduced"
 	CommandPerformanceDisable                              = performance.CommandDisable
 	CommandPerformanceEnable                               = performance.CommandEnable
+	CommandPerformanceSetTimeDomain                        = performance.CommandSetTimeDomain
 	CommandPerformanceGetMetrics                           = performance.CommandGetMetrics
 	EventPerformanceMetrics                                = "Performance.metrics"
 	CommandProfilerDisable                                 = profiler.CommandDisable
@@ -526,8 +552,10 @@ const (
 	EventStorageIndexedDBContentUpdated                    = "Storage.indexedDBContentUpdated"
 	EventStorageIndexedDBListUpdated                       = "Storage.indexedDBListUpdated"
 	CommandSystemInfoGetInfo                               = systeminfo.CommandGetInfo
+	CommandSystemInfoGetProcessInfo                        = systeminfo.CommandGetProcessInfo
 	CommandTargetActivateTarget                            = target.CommandActivateTarget
 	CommandTargetAttachToTarget                            = target.CommandAttachToTarget
+	CommandTargetAttachToBrowserTarget                     = target.CommandAttachToBrowserTarget
 	CommandTargetCloseTarget                               = target.CommandCloseTarget
 	CommandTargetExposeDevToolsProtocol                    = target.CommandExposeDevToolsProtocol
 	CommandTargetCreateBrowserContext                      = target.CommandCreateBrowserContext
@@ -548,6 +576,7 @@ const (
 	EventTargetTargetDestroyed                             = "Target.targetDestroyed"
 	EventTargetTargetCrashed                               = "Target.targetCrashed"
 	EventTargetTargetInfoChanged                           = "Target.targetInfoChanged"
+	CommandTestingGenerateTestReport                       = testing.CommandGenerateTestReport
 	CommandTetheringBind                                   = tethering.CommandBind
 	CommandTetheringUnbind                                 = tethering.CommandUnbind
 	EventTetheringAccepted                                 = "Tethering.accepted"
@@ -590,8 +619,17 @@ var emptyVal = &empty{}
 func UnmarshalMessage(msg *Message) (interface{}, error) {
 	var v easyjson.Unmarshaler
 	switch msg.Method {
+	case CommandAccessibilityDisable:
+		return emptyVal, nil
+
+	case CommandAccessibilityEnable:
+		return emptyVal, nil
+
 	case CommandAccessibilityGetPartialAXTree:
 		v = new(accessibility.GetPartialAXTreeReturns)
+
+	case CommandAccessibilityGetFullAXTree:
+		v = new(accessibility.GetFullAXTreeReturns)
 
 	case CommandAnimationDisable:
 		return emptyVal, nil
@@ -653,7 +691,16 @@ func UnmarshalMessage(msg *Message) (interface{}, error) {
 	case CommandAuditsGetEncodedResponse:
 		v = new(audits.GetEncodedResponseReturns)
 
+	case CommandBrowserGrantPermissions:
+		return emptyVal, nil
+
+	case CommandBrowserResetPermissions:
+		return emptyVal, nil
+
 	case CommandBrowserClose:
+		return emptyVal, nil
+
+	case CommandBrowserCrash:
 		return emptyVal, nil
 
 	case CommandBrowserGetVersion:
@@ -1130,6 +1177,9 @@ func UnmarshalMessage(msg *Message) (interface{}, error) {
 	case CommandEmulationResetPageScaleFactor:
 		return emptyVal, nil
 
+	case CommandEmulationSetFocusEmulationEnabled:
+		return emptyVal, nil
+
 	case CommandEmulationSetCPUThrottlingRate:
 		return emptyVal, nil
 
@@ -1177,6 +1227,36 @@ func UnmarshalMessage(msg *Message) (interface{}, error) {
 
 	case EventEmulationVirtualTimePaused:
 		v = new(emulation.EventVirtualTimePaused)
+
+	case CommandFetchDisable:
+		return emptyVal, nil
+
+	case CommandFetchEnable:
+		return emptyVal, nil
+
+	case CommandFetchFailRequest:
+		return emptyVal, nil
+
+	case CommandFetchFulfillRequest:
+		return emptyVal, nil
+
+	case CommandFetchContinueRequest:
+		return emptyVal, nil
+
+	case CommandFetchContinueWithAuth:
+		return emptyVal, nil
+
+	case CommandFetchGetResponseBody:
+		v = new(fetch.GetResponseBodyReturns)
+
+	case CommandFetchTakeResponseBodyAsStream:
+		v = new(fetch.TakeResponseBodyAsStreamReturns)
+
+	case EventFetchRequestPaused:
+		v = new(fetch.EventRequestPaused)
+
+	case EventFetchAuthRequired:
+		v = new(fetch.EventAuthRequired)
 
 	case CommandHeadlessExperimentalBeginFrame:
 		v = new(headlessexperimental.BeginFrameReturns)
@@ -1275,6 +1355,9 @@ func UnmarshalMessage(msg *Message) (interface{}, error) {
 		v = new(indexeddb.RequestDatabaseNamesReturns)
 
 	case CommandInputDispatchKeyEvent:
+		return emptyVal, nil
+
+	case CommandInputInsertText:
 		return emptyVal, nil
 
 	case CommandInputDispatchMouseEvent:
@@ -1673,6 +1756,18 @@ func UnmarshalMessage(msg *Message) (interface{}, error) {
 	case CommandPageStopScreencast:
 		return emptyVal, nil
 
+	case CommandPageSetProduceCompilationCache:
+		return emptyVal, nil
+
+	case CommandPageAddCompilationCache:
+		return emptyVal, nil
+
+	case CommandPageClearCompilationCache:
+		return emptyVal, nil
+
+	case CommandPageGenerateTestReport:
+		return emptyVal, nil
+
 	case EventPageDomContentEventFired:
 		v = new(page.EventDomContentEventFired)
 
@@ -1730,10 +1825,16 @@ func UnmarshalMessage(msg *Message) (interface{}, error) {
 	case EventPageWindowOpen:
 		v = new(page.EventWindowOpen)
 
+	case EventPageCompilationCacheProduced:
+		v = new(page.EventCompilationCacheProduced)
+
 	case CommandPerformanceDisable:
 		return emptyVal, nil
 
 	case CommandPerformanceEnable:
+		return emptyVal, nil
+
+	case CommandPerformanceSetTimeDomain:
 		return emptyVal, nil
 
 	case CommandPerformanceGetMetrics:
@@ -1961,11 +2062,17 @@ func UnmarshalMessage(msg *Message) (interface{}, error) {
 	case CommandSystemInfoGetInfo:
 		v = new(systeminfo.GetInfoReturns)
 
+	case CommandSystemInfoGetProcessInfo:
+		v = new(systeminfo.GetProcessInfoReturns)
+
 	case CommandTargetActivateTarget:
 		return emptyVal, nil
 
 	case CommandTargetAttachToTarget:
 		v = new(target.AttachToTargetReturns)
+
+	case CommandTargetAttachToBrowserTarget:
+		v = new(target.AttachToBrowserTargetReturns)
 
 	case CommandTargetCloseTarget:
 		v = new(target.CloseTargetReturns)
@@ -2026,6 +2133,9 @@ func UnmarshalMessage(msg *Message) (interface{}, error) {
 
 	case EventTargetTargetInfoChanged:
 		v = new(target.EventTargetInfoChanged)
+
+	case CommandTestingGenerateTestReport:
+		return emptyVal, nil
 
 	case CommandTetheringBind:
 		return emptyVal, nil
