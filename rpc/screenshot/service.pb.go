@@ -3,11 +3,9 @@
 
 package screenshot
 
-import (
-	fmt "fmt"
-	proto "github.com/golang/protobuf/proto"
-	math "math"
-)
+import proto "github.com/golang/protobuf/proto"
+import fmt "fmt"
+import math "math"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -37,7 +35,6 @@ func (*RequestImage) ProtoMessage()    {}
 func (*RequestImage) Descriptor() ([]byte, []int) {
 	return fileDescriptor_ecff0a2cf2aeb787, []int{0}
 }
-
 func (m *RequestImage) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RequestImage.Unmarshal(m, b)
 }
@@ -104,7 +101,6 @@ func (*Resp) ProtoMessage()    {}
 func (*Resp) Descriptor() ([]byte, []int) {
 	return fileDescriptor_ecff0a2cf2aeb787, []int{1}
 }
-
 func (m *Resp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Resp.Unmarshal(m, b)
 }
