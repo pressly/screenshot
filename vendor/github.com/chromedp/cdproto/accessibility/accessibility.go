@@ -13,6 +13,36 @@ import (
 	"github.com/chromedp/cdproto/runtime"
 )
 
+// DisableParams disables the accessibility domain.
+type DisableParams struct{}
+
+// Disable disables the accessibility domain.
+func Disable() *DisableParams {
+	return &DisableParams{}
+}
+
+// Do executes Accessibility.disable against the provided context.
+func (p *DisableParams) Do(ctxt context.Context, h cdp.Executor) (err error) {
+	return h.Execute(ctxt, CommandDisable, nil, nil)
+}
+
+// EnableParams enables the accessibility domain which causes AXNodeIds to
+// remain consistent between method calls. This turns on accessibility for the
+// page, which can impact performance until accessibility is disabled.
+type EnableParams struct{}
+
+// Enable enables the accessibility domain which causes AXNodeIds to remain
+// consistent between method calls. This turns on accessibility for the page,
+// which can impact performance until accessibility is disabled.
+func Enable() *EnableParams {
+	return &EnableParams{}
+}
+
+// Do executes Accessibility.enable against the provided context.
+func (p *EnableParams) Do(ctxt context.Context, h cdp.Executor) (err error) {
+	return h.Execute(ctxt, CommandEnable, nil, nil)
+}
+
 // GetPartialAXTreeParams fetches the accessibility node and partial
 // accessibility tree for this DOM node, if it exists.
 type GetPartialAXTreeParams struct {
@@ -78,7 +108,38 @@ func (p *GetPartialAXTreeParams) Do(ctxt context.Context, h cdp.Executor) (nodes
 	return res.Nodes, nil
 }
 
+// GetFullAXTreeParams fetches the entire accessibility tree.
+type GetFullAXTreeParams struct{}
+
+// GetFullAXTree fetches the entire accessibility tree.
+func GetFullAXTree() *GetFullAXTreeParams {
+	return &GetFullAXTreeParams{}
+}
+
+// GetFullAXTreeReturns return values.
+type GetFullAXTreeReturns struct {
+	Nodes []*Node `json:"nodes,omitempty"`
+}
+
+// Do executes Accessibility.getFullAXTree against the provided context.
+//
+// returns:
+//   nodes
+func (p *GetFullAXTreeParams) Do(ctxt context.Context, h cdp.Executor) (nodes []*Node, err error) {
+	// execute
+	var res GetFullAXTreeReturns
+	err = h.Execute(ctxt, CommandGetFullAXTree, nil, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Nodes, nil
+}
+
 // Command names.
 const (
+	CommandDisable          = "Accessibility.disable"
+	CommandEnable           = "Accessibility.enable"
 	CommandGetPartialAXTree = "Accessibility.getPartialAXTree"
+	CommandGetFullAXTree    = "Accessibility.getFullAXTree"
 )
