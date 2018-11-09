@@ -7,16 +7,24 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/pressly/screenshot/rpc/screenshot"
 )
 
-func main() {
-	flag.Parse()
+var (
+	flags = flag.NewFlagSet("screenshot", flag.ExitOnError)
 
-	args := flag.Args()
-	if len(args) != 2 {
-		log.Fatalln("./example URL OUTPUT-FILE")
+	// Logging options
+	window = flags.String("window", "800x600", "{width}x{height}")
+)
+
+func main() {
+	flags.Parse(os.Args[1:])
+
+	args := flags.Args()
+	if len(args) < 2 {
+		log.Fatalln("./example URL OUTPUT-FILE -window={width}x{height}")
 	}
 	urlLink, filename := args[0], args[1]
 
@@ -27,7 +35,7 @@ func main() {
 
 	client := screenshot.NewScreenshotJSONClient("http://localhost:6666", &http.Client{})
 
-	resp, err := client.Image(context.Background(), &screenshot.RequestImage{Url: u.String()})
+	resp, err := client.Image(context.Background(), &screenshot.RequestImage{Url: u.String(), Window: *window})
 	if err != nil {
 		log.Fatal(err)
 	}

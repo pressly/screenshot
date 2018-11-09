@@ -1,4 +1,6 @@
+img/
 bin
+.DS_STORE
 
 # Ignore everything in vendor/, except for *.go files,
 # LICENSE and COPYING. Ignore Go tests.

@@ -1,11 +1,10 @@
 package headless
 
 import (
-	"bytes"
 	"context"
-	"io"
 	"log"
 
+	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 	"github.com/pkg/errors"
 )
@@ -35,19 +34,31 @@ func (c *Chrome) Close() {
 	}
 }
 
-func (c *Chrome) NewImage(ctx context.Context, addr string) (io.Reader, error) {
+func (c *Chrome) NewImage(ctx context.Context, addr string, x, y, width, height float64) ([]byte, error) {
 	// run task list
+
 	var buf []byte
 	err := c.Run(ctx,
 		chromedp.Tasks{
 			chromedp.Navigate(addr),
 			chromedp.WaitReady("body"),
-			chromedp.CaptureScreenshot(&buf)},
-	)
-
+			chromedp.CaptureScreenshot(&buf),
+		})
 	if err != nil {
 		return nil, err
 	}
 
-	return bytes.NewReader(buf), nil
+	currentTarget := c.GetHandlerByIndex(0)
+	image, err := page.CaptureScreenshot().WithClip(&page.Viewport{
+		X:      x,
+		Y:      y,
+		Width:  width,
+		Height: height,
+		Scale:  1.0,
+	}).Do(ctx, currentTarget)
+	if err != nil {
+		return nil, err
+	}
+
+	return image, nil
 }
