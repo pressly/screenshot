@@ -16,5 +16,5 @@ proto:
 vendor:
 	GO111MODULE=on go mod vendor && GO111MODULE=on go mod tidy
 
-docs:
+doc:
 	protoc --doc_out=./doc --doc_opt=html,index.html ./rpc/screenshot/*.proto && open ./doc/index.html
