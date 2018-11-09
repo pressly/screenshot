@@ -15,8 +15,7 @@ import (
 var (
 	flags = flag.NewFlagSet("screenshot", flag.ExitOnError)
 
-	// Logging options
-	window = flags.String("window", "800x600", "{width}x{height}")
+	window = flags.String("window", "", "{width}x{height}")
 )
 
 func main() {
@@ -24,7 +23,7 @@ func main() {
 
 	args := flags.Args()
 	if len(args) < 2 {
-		log.Fatalln("./example URL OUTPUT-FILE -window={width}x{height}")
+		log.Fatalln("./example -window={width}x{height} URL OUTPUT-FILE")
 	}
 	urlLink, filename := args[0], args[1]
 
@@ -33,7 +32,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	client := screenshot.NewScreenshotJSONClient("http://localhost:6666", &http.Client{})
+	client := screenshot.NewScreenshotProtobufClient("http://localhost:6666", &http.Client{})
 
 	resp, err := client.Image(context.Background(), &screenshot.RequestImage{Url: u.String(), Window: *window})
 	if err != nil {

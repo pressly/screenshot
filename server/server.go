@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -29,10 +28,16 @@ type resolution struct {
 	height float64
 }
 
+// parseResolution parses a string of format 800x600, and converts it to
+// resolution. If s is empty, an initilized zero value resolution is returned.
 func parseResolution(s string) (*resolution, error) {
+	if s == "" {
+		return &resolution{}, nil
+	}
+
 	parts := strings.Split(s, "x")
 	if len(parts) < 2 {
-		return nil, errors.New(fmt.Sprintf("failed to parse resolution: %s", s))
+		return nil, errors.Errorf("failed to parse resolution: %s", s)
 	}
 	width, err := strconv.ParseFloat(parts[0], 64)
 	if err != nil {
@@ -57,11 +62,11 @@ func (s *server) Image(ctx context.Context, req *pb.RequestImage) (*pb.Resp, err
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	if req.Window == "" {
-		req.Window = "800x600"
+	window, err := parseResolution(req.Window)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse window resolution")
 	}
 
-	window, err := parseResolution(req.Window)
 	image, err := s.chrome.NewImage(ctx, req.Url, float64(req.X), float64(req.Y), window.width, window.height)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse window: %s", req.Window)
