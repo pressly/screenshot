@@ -51,7 +51,7 @@ func (c *Chrome) NewImage(ctx context.Context, addr string, x, y, width, height 
 		Y:      y,
 		Width:  width,
 		Height: height,
-		Scale:  1.0,
+		Scale:  0.5,
 	}).Do(ctx, currentTarget)
 	if err != nil {
 		return nil, err
